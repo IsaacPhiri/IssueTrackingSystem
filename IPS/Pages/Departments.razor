@@ -1,0 +1,112 @@
+﻿@page "/departments"
+@inject HttpClient httpClient
+@inject IJSRuntime javaScript
+<h3>Manage Departments</h3>
+<div>
+    <div class="row pa-4">
+        <div style="max-width:45vw; margin-bottom:20px;" class="col-sm-12">
+            <label for="nameInput">Department Name</label>
+            <input id="nameInput" @bind-value="@department.Name" required type="text" placeholder="Name" class="form-control"/>
+        </div> 
+        <div class="col-sm-12">
+           <button type="button" @onclick="Save" class="btn btn-success"><i class="oi oi-file"></i>Save</button>
+        </div>
+    </div>
+</div>
+<hr/>
+<table class="table table-striped table-hover mt-6">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var record in tableData)
+        {
+            <tr>
+                <td>@record.Id</td>
+                <td>@record.Name</td>
+                <td>
+                    <button @onclick="()=>Edit(record)" class="btn btn-warning"><i class="oi oi-pencil"></i>Edit</button>
+                    <button @onclick="()=>Delete(record.Id)" class="btn btn-danger"><i class="oi oi-trash"></i>Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    List<Department> tableData = new();
+    Department department = new();
+    protected override async void OnInitialized()
+    {
+        await LoadData();
+    }
+    async Task LoadData()
+    {
+        department = new();
+        var response = await httpClient.GetAsync("department");
+
+        if (response.IsSuccessStatusCode)
+        {
+            tableData = await response.Content.ReadFromJsonAsync<List<Department>>();
+            StateHasChanged();
+        }
+    }
+    void Edit(Department record)
+    {
+        department = record;
+
+    }
+    async Task Delete(int id)
+    {
+        var confirm = await javaScript.InvokeAsync<bool>("confirm", "Are you sure you want to delete this record?");
+        if(!confirm)
+        {
+            return;
+        }
+        var response = await httpClient.DeleteAsync($"department/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadData();
+        }
+        else
+        {
+            await javaScript.InvokeVoidAsync("alert", "An error occurred while trying to delete the department");
+        }
+    }
+    async Task Save()
+    {   if(string.IsNullOrWhiteSpace(department.Name))
+        {
+            return;
+        }
+        if(department.Id==0)
+        {
+            var response = await httpClient.PostAsJsonAsync("department", department);
+            if (response.IsSuccessStatusCode)
+            {
+
+                await LoadData();                 
+            }
+            else
+            {
+                await javaScript.InvokeVoidAsync("alert", "An error occurred while trying to save the department");
+            }
+        }
+        else
+        {
+            var response = await httpClient.PutAsJsonAsync($"department/{department.Id}", department);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadData();
+            }
+            else
+            {
+                await javaScript.InvokeVoidAsync("alert", "An error occurred while trying to save the department");
+            }
+        }
+    }
+
+}

@@ -1,0 +1,113 @@
+﻿@page "/inspectors"
+@inject HttpClient httpClient
+@inject IJSRuntime javaScript
+<h3>Manage Inspectors</h3>
+<div>
+    <div class="row pa-4">
+        <div style="max-width:45vw; margin-bottom:20px;" class="col-sm-12">
+            <label for="nameInput">Inspector's FirstName</label>
+            <input id="nameInput" @bind-value="@inspector.FirstName" required type="text" placeholder="FirstName" class="form-control"/>
+        </div> 
+        <div class="col-sm-12">
+           <button type="button" @onclick="Save" class="btn btn-success"><i class="oi oi-file"></i>Save</button>
+        </div>
+    </div>
+</div>
+<hr/>
+<table class="table table-striped table-hover mt-6">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>FirstName</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in tableData)
+        {
+                        <tr>
+                            <td>@record.Id</td>
+                            <td>@record.FirstName</td>
+                            <td>
+                                <button @onclick="()=>Edit(record)" class="btn btn-warning"><i class="oi oi-pencil"></i>Edit</button>
+                                <button @onclick="()=>Delete(record.Id)" class="btn btn-danger"><i class="oi oi-trash"></i>Delete</button>
+                            </td>
+                        </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    List<Inspector> tableData = new();
+    Inspector inspector = new();
+    protected override async void OnInitialized()
+    {
+        await LoadData();
+    }
+    async Task LoadData()
+    {
+        inspector = new();
+        var response = await httpClient.GetAsync("inspector");
+
+        if (response.IsSuccessStatusCode)
+        {
+            tableData = await response.Content.ReadFromJsonAsync<List<Inspector>>();
+            StateHasChanged();
+        }
+    }
+    void Edit(Inspector record)
+    {
+        inspector = record;
+
+    }
+    async Task Delete(int id)
+    {
+        var confirm = await javaScript.InvokeAsync<bool>("confirm", "Are you sure you want to delete this record?");
+        if (!confirm)
+        {
+            return;
+        }
+        var response = await httpClient.DeleteAsync($"inspector/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadData();
+        }
+        else
+        {
+            await javaScript.InvokeVoidAsync("alert", "An error occurred while trying to delete the inspector");
+        }
+    }
+    async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(inspector.FirstName))
+        {
+            return;
+        }
+        if (inspector.Id == 0)
+        {
+            var response = await httpClient.PostAsJsonAsync("inspector", inspector);
+            if (response.IsSuccessStatusCode)
+            {
+
+                await LoadData();
+            }
+            else
+            {
+                await javaScript.InvokeVoidAsync("alert", "An error occurred while trying to save!");
+            }
+        }
+        else
+        {
+            var response = await httpClient.PutAsJsonAsync($"inspector/{inspector.Id}", inspector);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadData();
+            }
+            else
+            {
+                await javaScript.InvokeVoidAsync("alert", "An error occurred while trying to save!");
+            }
+        }
+    }
+
+}

@@ -77,11 +77,11 @@ equipment.MapPost("", (DatabaseContext db, Equipment entity) =>
 });
 equipment.MapGet("", (DatabaseContext db) =>
 {
-    return db.Equipments.ToList();
+    return db.Equipments.Include(e=>e.Department).ToList();
 });
 equipment.MapGet("/{id}", (DatabaseContext db, int id) =>
 {
-    return db.Equipments.FirstOrDefault(d => d.Id == id);
+    return db.Equipments.Include(e => e.Department).FirstOrDefault(d => d.Id == id);
 });
 equipment.MapDelete("/{id}", (DatabaseContext db, int id) =>
 {

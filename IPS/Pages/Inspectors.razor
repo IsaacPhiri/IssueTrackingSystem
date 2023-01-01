@@ -2,23 +2,34 @@
 @inject HttpClient httpClient
 @inject IJSRuntime javaScript
 <h3>Manage Inspectors</h3>
-<div>
+<EditForm Model="@inspector" OnValidSubmit="Save">
+    <DataAnnotationsValidator/>
     <div class="row pa-4">
         <div style="max-width:45vw; margin-bottom:20px;" class="col-sm-12">
             <label for="nameInput">Inspector's FirstName</label>
-            <input id="nameInput" @bind-value="@inspector.FirstName" required type="text" placeholder="FirstName" class="form-control"/>
+            <InputText id="nameInput" @bind-Value="@inspector.FirstName" placeholder="FirstName" class="form-control"/>
+        </div>
+        <div style="max-width:45vw; margin-bottom:20px;" class="col-sm-12">
+            <label for="nameInput1">Inspector's Last Name</label>
+            <InputText id="nameInput1" @bind-Value="@inspector.LastName" placeholder="LastName" class="form-control"/>
+        </div> 
+        <div style="max-width:45vw; margin-bottom:20px;" class="col-sm-12">
+            <label for="nameInput2">Inspector's NRC</label>
+            <InputText id="nameInput2" @bind-Value="@inspector.NRC" placeholder="NRC" class="form-control"/>
         </div> 
         <div class="col-sm-12">
-           <button type="button" @onclick="Save" class="btn btn-success"><i class="oi oi-file"></i>Save</button>
+           <button type="submit"  class="btn btn-success"><i class="oi oi-file"></i>Save</button>
         </div>
     </div>
-</div>
+</EditForm>
 <hr/>
 <table class="table table-striped table-hover mt-6">
     <thead>
         <tr>
             <th>Id</th>
             <th>FirstName</th>
+            <th>LastName</th>
+            <th>NRC</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -28,6 +39,8 @@
                         <tr>
                             <td>@record.Id</td>
                             <td>@record.FirstName</td>
+                            <td>@record.LastName</td>
+                            <td>@record.NRC</td>
                             <td>
                                 <button @onclick="()=>Edit(record)" class="btn btn-warning"><i class="oi oi-pencil"></i>Edit</button>
                                 <button @onclick="()=>Delete(record.Id)" class="btn btn-danger"><i class="oi oi-trash"></i>Delete</button>
@@ -79,10 +92,7 @@
     }
     async Task Save()
     {
-        if (string.IsNullOrWhiteSpace(inspector.FirstName))
-        {
-            return;
-        }
+      
         if (inspector.Id == 0)
         {
             var response = await httpClient.PostAsJsonAsync("inspector", inspector);

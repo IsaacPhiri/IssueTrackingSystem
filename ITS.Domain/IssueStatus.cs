@@ -8,7 +8,7 @@ namespace ITS.Domain
 {
     public enum IssueStatus
     {
-        Open=1 ,
+        Open=1,
         Closed,
     }
 }

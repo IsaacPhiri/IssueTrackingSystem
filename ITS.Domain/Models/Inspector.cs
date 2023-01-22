@@ -18,5 +18,6 @@ namespace ITS.Domain.Models
         [Required,RegularExpression(@"^\d{6}\/\d{2}\/\d{1}$")]
        
         public string NRC { get; set; } = string.Empty; 
+        public string FullName =>FirstName + " " + LastName; 
     }
 }

@@ -10,6 +10,7 @@ namespace ITS.Domain.Models
     {
         [Key] 
         public int Id { get; set; }
+        [Required]
         public int EquipmentId { get; set; }    
         public int InspectorId { get; set; }    
         public string Description { get; set; }
@@ -18,6 +19,10 @@ namespace ITS.Domain.Models
         public DateTime? ClosedDate { get; set; }
         public Equipment Equipment { get; set; }
         public Inspector Inspector { get; set; }
+        public Issue()
+        {
+            Status = IssueStatus.Open;
+        }
 
     }
 }

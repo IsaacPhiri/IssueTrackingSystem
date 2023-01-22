@@ -28,6 +28,7 @@ app.UseCors(options =>
     options.AllowAnyOrigin();
     options.AllowAnyMethod();
 });
+#region Enpoints
 var departments = app.MapGroup("/department").WithOpenApi();
 var equipment = app.MapGroup("/equipment").WithOpenApi();
 var issues = app.MapGroup("/issue").WithOpenApi();
@@ -106,18 +107,29 @@ equipment.MapPut("/{id}", (DatabaseContext db, int id, Equipment entity) =>
     return $"{deleted} equipment(s) updated.";
 });
 issues.MapPost("", (DatabaseContext db, Issue entity) =>
-{
+{   
     db.Issues.Add(entity);
     var saved = db.SaveChanges();
     return saved;
 });
 issues.MapGet("", (DatabaseContext db) =>
 {
-    return db.Issues.ToList();
+    return db.Issues.Include(i=>i.Inspector).Include(i=>i.Equipment).ToList();
 });
 issues.MapGet("/{id}", (DatabaseContext db, int id) =>
 {
     return db.Issues.FirstOrDefault(d => d.Id == id);
+});
+issues.MapGet("/close/{id}", async (DatabaseContext db, int id) =>
+{
+    var issue = await db.Issues.FirstOrDefaultAsync(d => d.Id == id);
+    if(issue is not null)
+    {
+        issue.Status = ITS.Domain.IssueStatus.Closed;
+        issue.ClosedDate = DateTime.Now;
+        db.Issues.Update(issue);
+        await db.SaveChangesAsync();
+    }
 });
 issues.MapDelete("/{id}", (DatabaseContext db, int id) =>
 {
@@ -180,6 +192,7 @@ inspectors.MapPut("/{id}", (DatabaseContext db, int id, Inspector entity) =>
     var deleted = db.SaveChanges();
     return $"{deleted} inspector(s) updated.";
 });
+#endregion
 app.Run();
 
 

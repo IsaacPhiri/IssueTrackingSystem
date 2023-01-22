@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ITS.Domain.Models
@@ -18,7 +19,8 @@ namespace ITS.Domain.Models
         public string Location { get; set; }
         [Required,Range(1,int.MaxValue)]
         public int DepartmentId { get; set; }   
-        public Department Department { get; set; }  
-        public List<Issue> Issues { get; set; }
+        public Department Department { get; set; }
+        [JsonIgnore]
+        public IEnumerable<Issue> Issues { get; set; }
     }
 }

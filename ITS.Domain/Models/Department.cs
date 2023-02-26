@@ -3,7 +3,7 @@
 
 namespace ITS.Domain.Models
 {
-    public class Department
+    public partial class Department
     {
         [Key]
         public int Id { get; set; }
@@ -12,4 +12,5 @@ namespace ITS.Domain.Models
         
 
     }
+   
 }

@@ -17,6 +17,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlite("Data Source=IPS.db");
 });   
 builder.Services.AddScoped<IDepartmentService,DepartmentService>();
+builder.Services.AddScoped<IIssueService,IssueService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

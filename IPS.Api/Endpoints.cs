@@ -13,6 +13,7 @@ namespace ITS.Api
             var equipment = app.MapGroup("/equipment").WithOpenApi();
             var issues = app.MapGroup("/issue").WithOpenApi();
             var inspectors = app.MapGroup("/inspector").WithOpenApi();
+
             departments.MapPost("", async (IDepartmentService service, Department entity) =>
             {
                 return await service.Add(entity);
@@ -70,52 +71,26 @@ namespace ITS.Api
                 var deleted = db.SaveChanges();
                 return $"{deleted} equipment(s) updated.";
             });
-            issues.MapPost("", (DatabaseContext db, Issue entity) =>
+
+            issues.MapPost("", async (IIssueService service, Issue entity) =>
             {
-                db.Issues.Add(entity);
-                var saved = db.SaveChanges();
-                return saved;
+                return await service.Add(entity);
             });
-            issues.MapGet("", (DatabaseContext db) =>
+            issues.MapGet("", async (IIssueService service) =>
             {
-                return db.Issues.Include(i => i.Inspector).Include(i => i.Equipment).ToList();
+                return await service.GetAll();
             });
-            issues.MapGet("/{id}", (DatabaseContext db, int id) =>
+            issues.MapGet("/{id}", async (IIssueService service, int id) =>
             {
-                return db.Issues.FirstOrDefault(d => d.Id == id);
+                return await service.Get(id);
             });
-            issues.MapGet("/close/{id}", async (DatabaseContext db, int id) =>
+            issues.MapDelete("/{id}", async (IIssueService service, int id) =>
             {
-                var issue = await db.Issues.FirstOrDefaultAsync(d => d.Id == id);
-                if (issue is not null)
-                {
-                    issue.Status = ITS.Domain.IssueStatus.Closed;
-                    issue.ClosedDate = DateTime.Now;
-                    db.Issues.Update(issue);
-                    await db.SaveChangesAsync();
-                }
+                return await service.Delete(id);
             });
-            issues.MapDelete("/{id}", (DatabaseContext db, int id) =>
+            issues.MapPut("", async (IIssueService service, Issue entity) =>
             {
-                var record = db.Issues.FirstOrDefault(d => d.Id == id);
-                if (record == null)
-                {
-                    return "Not Found";
-                }
-                db.Issues.Remove(record);
-                var deleted = db.SaveChanges();
-                return $"{deleted} issue(s) deleted.";
-            });
-            issues.MapPut("/{id}", (DatabaseContext db, int id, Issue entity) =>
-            {
-                var record = db.Issues.FirstOrDefault(d => d.Id == id);
-                if (record == null)
-                {
-                    return "Not Found";
-                }
-                db.Issues.Update(entity);
-                var deleted = db.SaveChanges();
-                return $"{deleted} issue(s) updated.";
+                return await service.Update(entity);
             });
 
 
